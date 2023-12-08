@@ -32,5 +32,3 @@ for city in cities:
 df.to_csv('data/custom/current_forecast_combined.csv')
 
 print(df)
-
-# check the unix timestamp to see if this is current data 
