@@ -73,13 +73,13 @@ with tab3: # Model evaluation
     selected_models = st.multiselect('Select models to evaluate', model_options)
 
     for model_name in selected_models:
-        # predictions = generate_predictions(model_name)
+        predictions = generate_predictions(model_name)
 
-        # results = pd.DataFrame({
-        #     'DATETIME': df_train['DATETIME'],
-        #     'Actual': y,
-        #     'Predicted': predictions
-        # })
+        results = pd.DataFrame({
+            'DATETIME': df_train['DATETIME'],
+            'Actual': y,
+            'Predicted': predictions
+        })
 
         # plt.figure(figsize=(10, 10))
         # sns.scatterplot(x='Actual', y='Predicted', data=results)
