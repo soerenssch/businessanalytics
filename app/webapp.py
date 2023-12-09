@@ -94,8 +94,8 @@ with tab3: # Model evaluation
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10))
 
         # First plot
-        sns.lineplot(x='DATETIME', y='Actual', data=results, label='Actual', ax=ax1)
-        sns.lineplot(x='DATETIME', y='Predicted', data=results, label='Predicted', ax=ax1)
+        ax1.plot(x='DATETIME', y='Actual', data=results, label='Actual', ax=ax1)
+        ax1.plot(x='DATETIME', y='Predicted', data=results, label='Predicted', ax=ax1)
         ax1.set_title('Actual vs Predicted Energy Demand')
         ax1.set_xlabel('Date')
         ax1.set_ylabel('Energy Demand')
