@@ -20,7 +20,7 @@ import pickle
 
 def generate_predictions(model_name):
     if model_name == 'XGBoost':
-        XGBoost = pickle.load(open('../models/models_sav/XGB_grid.sav', 'rb'))
+        XGBoost = pickle.load(open('models/models_sav/XGB_grid.sav', 'rb'))
         predictions = XGBoost.predict(X)
 
         pass
