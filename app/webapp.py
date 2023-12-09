@@ -94,8 +94,8 @@ with tab3: # Model evaluation
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10))
 
         # First plot
-        ax1.plot(x='DATETIME', y='Actual', data=results, label='Actual', ax=ax1)
-        ax1.plot(x='DATETIME', y='Predicted', data=results, label='Predicted', ax=ax1)
+        ax1.plot(results['DATETIME'], results['Actual'], label='Actual', color='blue')
+        ax1.plot(results['DATETIME'], results['Predicted'], label='Predicted', color='orange', alpha=0.5)
         ax1.set_title('Actual vs Predicted Energy Demand')
         ax1.set_xlabel('Date')
         ax1.set_ylabel('Energy Demand')
