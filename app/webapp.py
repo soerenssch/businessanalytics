@@ -33,7 +33,7 @@ def generate_predictions(model_name):
 
 ## past data and trained models
 
-df_train = pd.read_csv('../data/custom/df_train.csv')
+df_train = pd.read_csv('data/custom/df_train.csv')
 
 # Preprocess data for predictions
 df_train['DATETIME'] = pd.to_datetime(df_train['DATETIME'])
