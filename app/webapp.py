@@ -15,7 +15,6 @@ import seaborn as sns
 import pickle
 
 
-
 ### functions
 
 def generate_predictions(model_name):
@@ -74,20 +73,41 @@ with tab3: # Model evaluation
     selected_models = st.multiselect('Select models to evaluate', model_options)
 
     for model_name in selected_models:
-        predictions = generate_predictions(model_name)
+        # predictions = generate_predictions(model_name)
 
-        results = pd.DataFrame({
-            'DATETIME': df_train['DATETIME'],
-            'Actual': y,
-            'Predicted': predictions
-        })
+        # results = pd.DataFrame({
+        #     'DATETIME': df_train['DATETIME'],
+        #     'Actual': y,
+        #     'Predicted': predictions
+        # })
 
-        plt.figure(figsize=(10, 10))
-        sns.scatterplot(x='Actual', y='Predicted', data=results)
-        plt.title(f'Predicted vs Actual for {model_name}')
-        plt.xlabel('Actual Values')
-        plt.ylabel('Predicted Values')
-        plt.plot([results['Actual'].min(), results['Actual'].max()], 
+        # plt.figure(figsize=(10, 10))
+        # sns.scatterplot(x='Actual', y='Predicted', data=results)
+        # plt.title(f'Predicted vs Actual for {model_name}')
+        # plt.xlabel('Actual Values')
+        # plt.ylabel('Predicted Values')
+        # plt.plot([results['Actual'].min(), results['Actual'].max()], 
+        #          [results['Actual'].min(), results['Actual'].max()], 
+        #          color='red', linestyle='--')
+        # st.pyplot(plt)
+
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10))
+
+        # First plot
+        sns.lineplot(x='DATETIME', y='Actual', data=results, label='Actual', ax=ax1)
+        sns.lineplot(x='DATETIME', y='Predicted', data=results, label='Predicted', ax=ax1)
+        ax1.set_title('Actual vs Predicted Energy Demand')
+        ax1.set_xlabel('Date')
+        ax1.set_ylabel('Energy Demand')
+        ax1.legend()
+
+        # Second plot
+        sns.scatterplot(x='Actual', y='Predicted', data=results, ax=ax2)
+        ax2.set_title(f'Predicted vs Actual for {model_name}')
+        ax2.set_xlabel('Actual Values')
+        ax2.set_ylabel('Predicted Values')
+        ax2.plot([results['Actual'].min(), results['Actual'].max()], 
                  [results['Actual'].min(), results['Actual'].max()], 
                  color='red', linestyle='--')
-        st.pyplot(plt)
+        
+        st.pyplot(fig)
