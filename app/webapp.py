@@ -120,7 +120,7 @@ with tab3: # Model evaluation
 
     for model_name in selected_models:
 
-        if model_name = 'SARIMAX':
+        if model_name == 'SARIMAX':
 
             stl = STL(df_daily, seasonal=365)
             res = stl.fit()
