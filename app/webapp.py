@@ -57,7 +57,7 @@ X['hour'] = X['DATETIME'].dt.hour
 X = X.drop(['DATETIME'], axis=1)
 
 
-model_options = ['XGBoost', 'Option2', 'Option3']
+model_options = ['XGBoost', 'SARIMAX', 'Option3']
 
 
 ### Streamlit configurations
@@ -70,8 +70,8 @@ with tab1: # Scenario inputs
     st.write('Scenario inputs')
 
     row1_col1, row1_col2, row1_col3 = st.columns([2.5,2.5,2.5]) 
-    Day = row1_col1.slider('Select Forecast length (in days).', 1, 100, 1, key=9)
-    Backtesting = row1_col2.slider('How many days backwards?', 1, 500, 1, key=10)
+    Day = row1_col1.slider('Select Forecast length (in days).', 1, 100, 30, key=9)
+    Backtesting = row1_col2.slider('How many days backwards?', 1, 500, 100, key=10)
     Weather = row1_col3.slider('Select the weather.', 0.0, 2.0, 0.6, key=11)
 
 
@@ -119,41 +119,62 @@ with tab3: # Model evaluation
     selected_models = st.multiselect('Select models to evaluate', model_options)
 
     for model_name in selected_models:
-        predictions = generate_predictions(model_name)
 
-        results = pd.DataFrame({
-            'DATETIME': df_train['DATETIME'],
-            'Actual': y,
-            'Predicted': predictions
-        })
+        if model_name = 'SARIMAX':
 
-        # plt.figure(figsize=(10, 10))
-        # sns.scatterplot(x='Actual', y='Predicted', data=results)
-        # plt.title(f'Predicted vs Actual for {model_name}')
-        # plt.xlabel('Actual Values')
-        # plt.ylabel('Predicted Values')
-        # plt.plot([results['Actual'].min(), results['Actual'].max()], 
-        #          [results['Actual'].min(), results['Actual'].max()], 
-        #          color='red', linestyle='--')
-        # st.pyplot(plt)
+            stl = STL(df_daily, seasonal=365)
+            res = stl.fit()
+            seasonal = res.seasonal
+            trend = res.trend
+            residual = res.resid
 
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10))
+            residual_model = SARIMAX(residual, order=(5, 0, 1), seasonal_order=(0, 0, 0, 0)) 
+            residual_model = residual_model.fit()
+            predictions = residual_model.predict(start=0, end=len(residual)-1) + trend + seasonal
 
-        # First plot
-        ax1.plot(results['DATETIME'], results['Actual'], label='Actual', color='blue')
-        ax1.plot(results['DATETIME'], results['Predicted'], label='Predicted', color='orange', alpha=0.5)
-        ax1.set_title('Actual vs Predicted Energy Demand')
-        ax1.set_xlabel('Date')
-        ax1.set_ylabel('Energy Demand')
-        ax1.legend()
-
-        # Second plot
-        sns.scatterplot(x='Actual', y='Predicted', data=results, ax=ax2)
-        ax2.set_title(f'Predicted vs Actual for {model_name}')
-        ax2.set_xlabel('Actual Values')
-        ax2.set_ylabel('Predicted Values')
-        ax2.plot([results['Actual'].min(), results['Actual'].max()], 
-                 [results['Actual'].min(), results['Actual'].max()], 
-                 color='red', linestyle='--')
+            fig, ax = plt.subplots(figsize=(12, 8))
+            ax.plot(df_daily, label='Observed')
+            ax.plot(predictions, label='Predictions')
+            ax.title('In-Sample prediction for SARIMAX')
+            ax.legend()
+            st.pyplot(fig)
         
-        st.pyplot(fig)
+        else:
+            predictions = generate_predictions(model_name)
+
+            results = pd.DataFrame({
+                'DATETIME': df_train['DATETIME'],
+                'Actual': y,
+                'Predicted': predictions
+            })
+
+            # plt.figure(figsize=(10, 10))
+            # sns.scatterplot(x='Actual', y='Predicted', data=results)
+            # plt.title(f'Predicted vs Actual for {model_name}')
+            # plt.xlabel('Actual Values')
+            # plt.ylabel('Predicted Values')
+            # plt.plot([results['Actual'].min(), results['Actual'].max()], 
+            #          [results['Actual'].min(), results['Actual'].max()], 
+            #          color='red', linestyle='--')
+            # st.pyplot(plt)
+
+            fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10))
+
+            # First plot
+            ax1.plot(results['DATETIME'], results['Actual'], label='Actual', color='blue')
+            ax1.plot(results['DATETIME'], results['Predicted'], label='Predicted', color='orange', alpha=0.5)
+            ax1.set_title('Actual vs Predicted Energy Demand')
+            ax1.set_xlabel('Date')
+            ax1.set_ylabel('Energy Demand')
+            ax1.legend()
+
+            # Second plot
+            sns.scatterplot(x='Actual', y='Predicted', data=results, ax=ax2)
+            ax2.set_title(f'Predicted vs Actual for {model_name}')
+            ax2.set_xlabel('Actual Values')
+            ax2.set_ylabel('Predicted Values')
+            ax2.plot([results['Actual'].min(), results['Actual'].max()], 
+                    [results['Actual'].min(), results['Actual'].max()], 
+                    color='red', linestyle='--')
+            
+            st.pyplot(fig)
