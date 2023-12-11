@@ -13,6 +13,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pickle
+import numpy as np
+import statsmodels
+from statsmodels.tsa.seasonal import STL
+from statsmodels.tsa.holtwinters import ExponentialSmoothing
+from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 
 ### functions
@@ -37,6 +42,10 @@ df_train = pd.read_csv('data/custom/df_train.csv')
 # Preprocess data for predictions
 df_train['DATETIME'] = pd.to_datetime(df_train['DATETIME'])
 
+df_daily = df_train.set_index('DATETIME', inplace=True)
+df_daily = df_train[['ND_TARGET']].resample('D').sum()
+
+
 X = df_train.drop(['ND_TARGET'], axis=1)
 y = df_train['ND_TARGET']
 
@@ -60,9 +69,45 @@ with tab1: # Scenario inputs
     st.write('Scenario inputs')
 
     row1_col1, row1_col2, row1_col3 = st.columns([2.5,2.5,2.5]) 
-    Day = row1_col1.slider('Select a day.', 0.0, 0.5, 0.007, key=9)
-    Month = row1_col2.slider('Select a month.', 0.0, 1.0, 0.05, key=10)
+    Day = row1_col1.slider('Select Forecast length (in days).', 1, 100, 1, key=9)
+    Backtesting = row1_col2.slider('How many days backwards?', 1, 500, 1, key=10)
     Weather = row1_col3.slider('Select the weather.', 0.0, 2.0, 0.6, key=11)
+
+
+    stl = STL(df_daily, seasonal=365)
+    res = stl.fit()
+    seasonal = res.seasonal
+    trend = res.trend
+    residual = res.resid
+
+    residual_model = SARIMAX(residual, order=(5, 0, 1), seasonal_order=(0, 0, 0, 0)) 
+    residual_model = residual_model.fit()
+
+    # Exponential Smoothing for trend prediction
+    trend_model = ExponentialSmoothing(trend, trend='add', seasonal=None, damped_trend=True)
+    trend_model = trend_model.fit(smoothing_level=0.6, smoothing_trend=0.02, damping_trend=1)
+
+    # Forecast the trend component out-of-sample
+    trend_forecast = trend_model.predict(start=len(df_daily), end=len(df_daily) + Day - 1)
+
+    # Extend the seasonal component by repeating the last year's seasonality
+    seasonal_forecast = np.tile(seasonal[-Day:], 1)
+    seasonal_forecast = seasonal_forecast[:Day]
+
+    # Forecast the residuals out-of-sample
+    residual_forecast = residual_model.get_forecast(steps=Day).predicted_mean
+
+    # Combine the forecast components
+    combined_forecast = trend_forecast.values + seasonal_forecast + residual_forecast
+
+    fig, ax = plt.subplots(figsize=(20, 10))
+    ax.plot(df_daily.tail(Backtesting), label='Past')
+    ax.plot(combined_forecast, label='Forecast')
+    ax.set_title('Past vs Forecasted Energy Demand')
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Energy Demand')
+    ax.legend()
+    st.pyplot(fig)
 
 
 with tab2: # Live data via API
