@@ -135,7 +135,9 @@ with tab3: # Model evaluation
             fig, ax = plt.subplots(figsize=(12, 8))
             ax.plot(df_daily, label='Observed')
             ax.plot(predictions, label='Predictions')
-            ax.title('In-Sample prediction for SARIMAX')
+            ax.set_title('In-Sample prediction for SARIMAX')
+            ax.set_xlabel('Date')
+            ax.set_ylabel('Energy Demand')
             ax.legend()
             st.pyplot(fig)
         
