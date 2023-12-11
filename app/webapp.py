@@ -72,7 +72,7 @@ with tab1: # Scenario inputs
     row1_col1, row1_col2, row1_col3 = st.columns([2.5,2.5,2.5]) 
     Day = row1_col1.slider('Select Forecast length (in days).', 1, 100, 30, key=9)
     Backtesting = row1_col2.slider('How many days backwards?', 1, 500, 100, key=10)
-    Weather = row1_col3.slider('Select the weather.', 0.0, 2.0, 0.6, key=11)
+    Weather = row1_col3.slider('Select the smoothing level.', 0.0, 1.0, 0.6, key=11)
 
 
     stl = STL(df_daily, seasonal=365)
