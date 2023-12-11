@@ -37,15 +37,15 @@ def generate_predictions(model_name):
 
 ## past data and trained models
 
-df_train = pd.read_csv('data/custom/df_train.csv')
+df_train = pd.read_csv('../data/custom/df_train.csv')
 
 # Preprocess data for predictions
 df_train['DATETIME'] = pd.to_datetime(df_train['DATETIME'])
 
-df_daily = df_train
-df_daily.set_index('DATETIME', inplace=True)
-df_daily = df_train[['ND_TARGET']].resample('D').sum()
+df_daily = df_train[['DATETIME', 'ND_TARGET']]
 
+df_daily.set_index('DATETIME', inplace=True)
+df_daily = df_daily[['ND_TARGET']].resample('D').sum()
 
 X = df_train.drop(['ND_TARGET'], axis=1)
 y = df_train['ND_TARGET']
