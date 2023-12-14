@@ -3,32 +3,31 @@ import json
 
 cities = ['london', 'liverpool', 'bath']
 
+# Define columns for the DataFrame
+columns = ['city', 'datetime', 'temp', 'temp_min', 'temp_max', 'humidity']
 
-columns = ['temp_' + city for city in cities] + \
-          ['temp_min_' + city for city in cities] + \
-          ['temp_max_' + city for city in cities] + \
-          ['humidity_' + city for city in cities]
-df = pd.DataFrame(columns=columns, index=[0])
-
+# Initialize an empty DataFrame
+df = pd.DataFrame(columns=columns)
 
 for city in cities:
     with open(f'data/custom/current_forecast_{city}.json', 'r') as file:
         data = json.load(file)
 
-    # Data Processing
-    first_item = data['list'][0]['main']
-    temp = first_item['temp']
-    temp_min = first_item['temp_min']
-    temp_max = first_item['temp_max']
-    humidity = first_item['humidity']
+    # Iterate over each item in the data list
+    for item in data['list']:
+        datetime = pd.to_datetime(item['dt'], unit='s', utc=True)
+        temp = item['main']['temp']
+        temp_min = item['main']['temp_min']
+        temp_max = item['main']['temp_max']
+        humidity = item['main']['humidity']
 
-    # Assign values to the DataFrame
-    df[f'temp_{city}'] = temp
-    df[f'temp_min_{city}'] = temp_min
-    df[f'temp_max_{city}'] = temp_max
-    df[f'humidity_{city}'] = humidity
+        # Append each observation as a new row in the DataFrame
+        df = df.append({'city': city, 'datetime': datetime, 'temp': temp, 
+                        'temp_min': temp_min, 'temp_max': temp_max, 
+                        'humidity': humidity}, ignore_index=True)
 
+# Save the DataFrame to CSV
+df.to_csv('data/custom/forecasts_combined.csv')
 
-df.to_csv('data/custom/current_forecast_combined.csv')
-
+# Print the DataFrame
 print(df)
