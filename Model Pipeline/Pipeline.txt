@@ -1,0 +1,5 @@
+Data Fetching
+Data Processing
+Saved Finished Dataframe
+Models Training based on Dataframe 
+Save Models
